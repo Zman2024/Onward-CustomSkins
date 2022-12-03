@@ -1,47 +1,36 @@
 ﻿using System;
-using System.IO;
-using System.IO.Compression;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BepInEx;
-using HarmonyLib;
-using BepInEx.Configuration;
-using BepInEx.Harmony;
 using UnityEngine;
-using UnityEditor;
-using System.Reflection;
-using System.Collections;
+using BepInEx;
 
 namespace CustomSkins
 {
-    internal static class Settings
-    {
-        public static ConfigEntry<bool> LoadGlobal { get; set; }
-        public static bool HasLoadedGlobal { get; set; } = false;
-
-        private static class Definitions
-        {
-            public static ConfigDefinition LoadGlobal = new ConfigDefinition("CustomSkins", "LoadGlobal");
-            public static ConfigDescription LoadGlobalDesc = new ConfigDescription("Applyies cutom skins gobally (overwrites original texture)");
-        }
-
-        internal static void LoadConfig(ConfigFile cfg)
-        {
-            LoadGlobal = cfg.Bind(Definitions.LoadGlobal, false, Definitions.LoadGlobalDesc);
-        }
-
-    }
-
     public class SkinInfo
     {
+        // The file name expected to be in CustomSkins that holds the texture data that
+        // will replace the ObjectName's MeshRenderer.material.mainTexture
         public string FileName;
+
+        // The name of the pickup that this object belongs to
+        // eg: Pickup_MK18
         public string PickupName;
+
+        // The name of the object that has the MeshRenderer
+        // who's texture we want to replace
         public string ObjectName;
+
+        // The WeaponName of the gun (real?)
         public WeaponName WeaponName;
 
+        // The raw bytes of the image loaded from the CustomSkins folder
         public byte[] TextureBytes;
+
+        // This... i dont know what this is yet but i want it here for the future.
+        // As of right now im using it to hold a reference to the mainTexture
+        // that has it's texture replaced
         public Texture2D Texture;
 
         public SkinInfo() { }
@@ -58,7 +47,7 @@ namespace CustomSkins
 
     public static class Translation
     {
-        public static readonly List<SkinInfo> Translations = new List<SkinInfo>()
+        private static readonly List<SkinInfo> Translations = new List<SkinInfo>()
         {
             new SkinInfo("mk18-body-texture", "Pickup_MK18", "WPN_MK18", WeaponName.MK18),
             new SkinInfo("glock17-body-texture", "Pickup_G17", "glock_17_body", WeaponName.G17),
@@ -76,7 +65,7 @@ namespace CustomSkins
             new SkinInfo("mp5-body-texture", "Pickup_MP5", "WPN_MP5", WeaponName.MP5),
 
             new SkinInfo("p90-body-texture", "Pickup_P90", "m_gun", WeaponName.P90),
-            new SkinInfo("commando552-body-texture", "Pickup_552Commando", "552_commando.001", WeaponName.Commando552),
+            new SkinInfo("552commando-body-texture", "Pickup_552Commando", "552_commando.001", WeaponName.Commando552),
             new SkinInfo("l86a2-lsw-body-texture", "Pickup_SA80", "SA80_LSW_Body", WeaponName.SA80),
             new SkinInfo("m249-body-texture", "Pickup_M249", "M249_main", WeaponName.M249),
 
@@ -93,7 +82,9 @@ namespace CustomSkins
             new SkinInfo("flaregun-body-texture", "Pickup_FlareGun", "flare_gun_base", WeaponName.FlareGun),
             new SkinInfo("spas12-body-texture", "Pickup_SPAS12", "m_shot12", WeaponName.SPAS12),
 
-            new SkinInfo("svd-body-texture", "Pickup_SVD", "polySurface8415", WeaponName.SVD), // may not work
+            new SkinInfo("famas-body-texture", "Pickup_Famas", "polySurface2163", WeaponName.Famas),
+            new SkinInfo("pkm-body-texture", "Pickup_PKM", "polySurface4195", WeaponName.PKM),
+            new SkinInfo("svd-body-texture", "Pickup_SVD", "polySurface8415", WeaponName.SVD),
             new SkinInfo("aks74u-body-texture", "Pickup_AK74u", "aks74u_body", WeaponName.AK74u),
 
             new SkinInfo("g36c-body-texture", "Pickup_G36", "g36c_body", WeaponName.G36c),
@@ -105,85 +96,42 @@ namespace CustomSkins
             new SkinInfo("g3a3-auto-body-texture", "Pickup_G3Auto", "g3a3_main_body", WeaponName.G3Auto),
             new SkinInfo("taser-body-texture", "Pickup_Taser", "taser_body", WeaponName.Taser),
 
-            // need pkm and famas
-
         };
 
-        public static SkinInfo FromWeaponName(WeaponName wpnName)
+        /// <summary>
+        /// Returns the SkinInfo instance with the matching WeaponName (subject to becoming an array)
+        /// </summary>
+        public static SkinInfo FromWeaponName(WeaponName wpnName) => Translations.Find((info) => info.WeaponName == wpnName);
+
+        /// <summary>
+        /// Returns the SkinInfo instance with the matching PickupName (subject to becoming an array)
+        /// </summary>
+        public static SkinInfo FromPickupName(string pickupName) => Translations.Find((info) => info.PickupName == pickupName);
+
+        /// <summary>
+        /// Returns the SkinInfo instance with the matching FileName
+        /// </summary>
+        public static SkinInfo FromFileName(string fileName) => Translations.Find((info) => info.FileName.ToLower() == fileName.ToLower());
+
+        /// <summary>
+        /// Returns the SkinInfo instance with the matching ObjectName
+        /// </summary>
+        public static SkinInfo FromObjectName(string objName) => Translations.Find((info) => info.ObjectName == objName);
+
+        /// <summary>
+        /// Adds a SkinInfo to the list of translated objects
+        /// </summary>
+        public static bool AddTranslation(SkinInfo info)
         {
-            return Translations.Find((bundle) => bundle.WeaponName == wpnName);
-        }
+            // Cant have null / whitespace only file names
+            if (info.FileName.IsNullOrWhiteSpace()) return false;
 
-        public static SkinInfo FromFileName(string fileName)
-        {
-            return Translations.Find((bundle) => bundle.FileName == fileName);
-        }
+            // Already has a SkinInfo with the same file name
+            if (FromFileName(info.FileName) != null)
+                return false;
 
-        public static SkinInfo FromPickupName(string pickupName)
-        {
-            return Translations.Find((bundle) => bundle.PickupName == pickupName);
-        }
-
-    }
-
-    [BepInPlugin("Zman2024-CustomSkins", "Custom Skins", "0.1.0.0")]
-    public class Plugin : BaseUnityPlugin
-    {
-        public static readonly string CustomSkinsFolder = Path.Combine(Directory.GetCurrentDirectory(), "CustomSkins");
-
-        public static List<SkinInfo> CurrentSkins = new List<SkinInfo>();
-
-        public void Start()
-        {
-            try
-            {
-                if (!Directory.Exists(CustomSkinsFolder))
-                {
-                    Directory.CreateDirectory(CustomSkinsFolder);
-                }
-                else
-                {
-                    Logger.LogInfo("Loading textures");
-
-                    string[] files = Directory.GetFiles(CustomSkinsFolder);
-                    for (int x = 0; x < files.Length; x++)
-                    {
-                        string fpathfull = files[x].ToLower();
-                        if (fpathfull.EndsWith(".zip"))
-                        {
-                            // TODO: make this work so people can create texture packs
-                            continue;
-                        }
-
-                        string fnameNoExt = Path.GetFileNameWithoutExtension(fpathfull);
-                        SkinInfo info = Translation.FromFileName(fnameNoExt);
-
-                        if (info != null)
-                        {
-                            info.TextureBytes = File.ReadAllBytes(fpathfull);
-                            CurrentSkins.Add(info);
-                            Logger.LogInfo($"Loaded texture {Path.GetFileName(files[x])} for {info.WeaponName}");
-                        }
-
-                    }
-
-                    Logger.LogInfo("Applying harmony patches...");
-                    var harmony = Harmony.CreateAndPatchAll(typeof(HarmonyPatches));
-                }
-
-                Logger.LogInfo("Done");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex);
-                return;
-            }
-        }
-        
-        public void Awake()
-        {
-            HarmonyPatches.Logger = Logger;
-            Settings.LoadConfig(Config);
+            Translations.Add(info);
+            return true;
         }
 
     }

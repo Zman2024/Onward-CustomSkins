@@ -6,13 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.Audio;
-using UnityEngine.Networking;
-using UnityEngine.UI;
-using MonoMod;
-using System.Reflection;
-using Onward;
-using Onward.UI;
 
 namespace CustomSkins
 {
@@ -26,39 +19,61 @@ namespace CustomSkins
         [HarmonyPatch(typeof(PickupLibrary), nameof(PickupLibrary.Initialize))]
         public static void PickupLibrary_Initialize(PickupLibrary __instance)
         {
+            // Dont do this more than once because there's no reason to
+            // The changes to the textures stay for the lifetime of the game
+            if (!Settings.LoadGlobal.Value || Settings.HasLoadedGlobal)
+                return;
+
             try
             {
-                if (Settings.LoadGlobal.Value && !Settings.HasLoadedGlobal)
+                // Go through all weapons (may be faster to go through all Plugins.CurrentSkins but ah who cares)
+                foreach (var winfo in __instance.Weapons)
                 {
-                    foreach (var winfo in __instance.Weapons)
+                    // Make sure the pickup reference has a Pickup_Gun on it
+                    if (winfo.PickupRef && winfo.PickupRef.IsPickupGunInstance)
                     {
-                        if (winfo.PickupRef && winfo.PickupRef.IsPickupGunInstance)
+                        Pickup_Gun pickup = winfo.PickupRef.LoadRef().GetComponent<Pickup_Gun>();
+
+                        // Find the skin info for this weapon (may be null)
+                        SkinInfo info = Plugin.CurrentSkins.Find((match) => match.WeaponName == winfo.weapon);
+
+                        // Make sure there is a skin for this weapon and the texture bytes were loaded
+                        if (info == null || info.TextureBytes == null || info.TextureBytes.Length == 0) continue;
+
+                        // Get all mesh renderers for the weapon model
+                        MeshRenderer[] meshRenderers = pickup.WeaponModel.GetComponentsInChildren<MeshRenderer>();
+
+                        // Search for the mesh renderer we need to override using the SkinInfo.ObjectName
+                        for (int x = 0; x < meshRenderers.Length; x++)
                         {
-                            Pickup_Gun pickup = winfo.PickupRef.LoadRef().GetComponent<Pickup_Gun>();
+                            MeshRenderer renderer = meshRenderers[x];
 
-                            SkinInfo info = Plugin.CurrentSkins.Find((match) => match.WeaponName == winfo.weapon);
-                            if (info != null && info.TextureBytes != null)
+                            // Check the renderer's name against the SkinInfo.ObjectName
+                            // I shouldn't need the (Clone) but just in case
+                            if (renderer.name == info.ObjectName || renderer.name == (info.ObjectName + "(Clone)"))
                             {
-                                MeshRenderer[] meshRenderers = pickup.WeaponModel.GetComponentsInChildren<MeshRenderer>();
-                                for (int x = 0; x < meshRenderers.Length; x++)
-                                {
-                                    var renderer = meshRenderers[x];
-                                    if (renderer.name == info.ObjectName || renderer.name == (info.ObjectName + "(Clone)"))
-                                    {
-                                        Logger.LogInfo($"Replacing texture on renderer: {renderer.name} with sortingLayerName: {renderer.sortingLayerName}");
-                                        var tex = renderer.material.mainTexture as Texture2D;
-                                        tex.LoadImage(info.TextureBytes);
-                                        info.Texture = tex;
-                                        Logger.LogInfo($"Replaced texture for {info.WeaponName}");
-                                        break;
-                                    }
-                                }
-                            }
+                                // Cast to Texture2D so we can use LoadImage
+                                Texture2D tex = renderer.material.mainTexture as Texture2D;
+                                info.Texture = tex;
 
+                                // Replace the texture with the image loaded from CustomSkins
+                                if (tex.LoadImage(info.TextureBytes))
+                                {
+                                    Logger.LogInfo($"Replaced texture for {info.WeaponName}");
+                                }
+                                else // RIP bozo it didnt work
+                                {
+                                    Logger.LogWarning($"Could not replace texture for {info.WeaponName} (bad format?)");
+                                }
+
+                                break;
+                            }
                         }
                     }
-                    Settings.HasLoadedGlobal = true;
                 }
+
+                // No need to run this more than once (for now)
+                Settings.HasLoadedGlobal = true;
             }
             catch (Exception ex)
             {
