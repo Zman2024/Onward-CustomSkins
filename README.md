@@ -7,7 +7,7 @@ An early development custom skins mod for Onward 1.7.7
 
 2. Either [download the latest release](https://github.com/Zman2024/Onward-CustomSkins/releases/latest) or build from source
 
-3. Put `CustomSkins.dll` into `Onward/BepInEx/plugins`
+3. Either put `CustomSkins.dll` into `Onward/BepInEx/plugins` or just drag and drop the contents of the release zip into the onward folder
 
 4. Boom, installed
 
