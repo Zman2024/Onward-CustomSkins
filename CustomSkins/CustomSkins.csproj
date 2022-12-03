@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+        <DebugType Condition=" '$(Configuration)' == 'Release' ">None</DebugType>
+    </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>F:\SteamGames\steamapps\common\Onward\Game\BepInEx\core\0Harmony.dll</HintPath>
