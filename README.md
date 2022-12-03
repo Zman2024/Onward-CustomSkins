@@ -17,7 +17,7 @@ and then click "Load file". Next navigate to your onward install and go to the `
 and wait for asset studio to finish loading the assets (this process will use about 3GB of ram btw). Go to the `Asset List` tab and search 
 for the weapon texture you are looking for by using the list below. Once you have found selected texture(s) you want to export, right click it
 and click "Export selected assets" then chose the folder you want the textures to be exported to. Asset studio will create a subfolder 
-called "Texture2D" and in it will be all the the textures you exported. Now for the names of all the textures (they are a bit difficult to search for
+called "Texture2D" and in it will be all the textures you exported. Here's a list of the names of all the textures (they are a bit difficult to search for
 so here's a list of them)
 
 <details>
@@ -119,5 +119,5 @@ For the time being there are only 2 config variables (located at `Onward/BepInEx
 
 * `Enabled` which determines if the mod should load custom textures
 
-* `LoadGlobal` which determines if textures should be globally replaced
-For now all textures are globally replaced so if this is false no textures custom will be loaded
+* `LoadGlobal` which determines if textures should be globally replaced.
+For now all textures are globally replaced so if this is false no custom textures will be loaded
