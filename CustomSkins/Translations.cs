@@ -25,6 +25,9 @@ namespace CustomSkins
         // The WeaponName of the gun (real?)
         public WeaponName WeaponName;
 
+        // The EquipmentType (if this is an equipment entry)
+        public ClassLoadout.EquipmentType EquipmentType;
+
         // The raw bytes of the image loaded from the CustomSkins folder
         public byte[] TextureBytes;
 
@@ -35,12 +38,22 @@ namespace CustomSkins
 
         public SkinInfo() { }
 
-        public SkinInfo(string fileName, string pickupName, string objectName, WeaponName weaponName)
+        public SkinInfo(string fileName, string pickupName, string objectName, WeaponName weaponName = WeaponName.NULL, ClassLoadout.EquipmentType equipmentType = ClassLoadout.EquipmentType.NULL)
         {
             FileName = fileName;
             PickupName = pickupName;
             ObjectName = objectName;
             WeaponName = weaponName;
+            EquipmentType = equipmentType;
+        }
+
+        public SkinInfo(string fileName, string pickupName, string objectName, ClassLoadout.EquipmentType equipmentType = ClassLoadout.EquipmentType.NULL, WeaponName weaponName = WeaponName.NULL)
+        {
+            FileName = fileName;
+            PickupName = pickupName;
+            ObjectName = objectName;
+            WeaponName = weaponName;
+            EquipmentType = equipmentType;
         }
 
     }
@@ -96,6 +109,16 @@ namespace CustomSkins
             new SkinInfo("g3a3-auto-body-texture", "Pickup_G3Auto", "g3a3_main_body", WeaponName.G3Auto),
             new SkinInfo("taser-body-texture", "Pickup_Taser", "taser_body", WeaponName.Taser),
 
+            new SkinInfo("m18-smoke-white-body-texture", "Pickup_Smoke_Grenade", "m18_smoke_body", ClassLoadout.EquipmentType.GrenadeSmokeWhite),
+            new SkinInfo("m18-smoke-green-body-texture", "Pickup_Smoke_Grenade", "polySurface7.001", ClassLoadout.EquipmentType.GrenadeSmokeGreen),
+            new SkinInfo("m18-smoke-red-body-texture", "Pickup_Smoke_Grenade", "polySurface7.001", ClassLoadout.EquipmentType.GrenadeSmokeRed),
+            new SkinInfo("flashbang-body-texture", "Pickup_GrenadeFlash", "flashbang", ClassLoadout.EquipmentType.GrenadeStun),
+
+            new SkinInfo("frag-grenade-body-texture", "Pickup_Grenade", "grenade_body", ClassLoadout.EquipmentType.GrenadeFrag),
+            new SkinInfo("syringe-body-texture", "Pickup_Syringe", "Main", ClassLoadout.EquipmentType.SyringeExtra),
+            new SkinInfo("molotov-and-lighter-body-texture", "Pickup_Molotov", "molotov_bottle 1", ClassLoadout.EquipmentType.GrenadeMolotov),
+            new SkinInfo("c4-and-detonator-body-texture", "Pickup_C4", "C4", ClassLoadout.EquipmentType.C4),
+            
         };
 
         /// <summary>
@@ -117,6 +140,11 @@ namespace CustomSkins
         /// Returns the SkinInfo instance with the matching ObjectName
         /// </summary>
         public static SkinInfo FromObjectName(string objName) => Translations.Find((info) => info.ObjectName == objName);
+
+        /// <summary>
+        /// Returns the SkinInfo instance with the matching EquipmentType
+        /// </summary>
+        public static SkinInfo FromEquipmentType(ClassLoadout.EquipmentType type) => Translations.Find((info) => info.EquipmentType == type);
 
         /// <summary>
         /// Adds a SkinInfo to the list of translated objects

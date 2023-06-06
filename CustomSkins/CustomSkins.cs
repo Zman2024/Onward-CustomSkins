@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,9 +69,13 @@ namespace CustomSkins
                             // Load the image bytes into the SkinInfo's TextureBytes so it can be used
                             // by HarmonyPatches.PickupLibrary_Initialize later, and add the skin to the
                             // list of current skins
+
                             info.TextureBytes = File.ReadAllBytes(fpathfull);
                             CurrentSkins.Add(info);
-                            Logger.LogInfo($"Loaded texture {Path.GetFileName(files[x])} for {info.WeaponName}");
+                            if (info.WeaponName != WeaponName.NULL)
+                                Logger.LogInfo($"Loaded texture {Path.GetFileName(files[x])} for {info.WeaponName}");
+                            else
+                                Logger.LogInfo($"Loaded texture {Path.GetFileName(files[x])} for {info.EquipmentType}");
                         }
 
                     }

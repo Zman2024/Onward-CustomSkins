@@ -110,6 +110,15 @@ tar21-body-texture
 rpg7-body-texture
 sv98-body-texture
 g3a3-auto-body-texture
+
+m18-smoke-white-body-texture
+m18-smoke-green-body-texture
+m18-smoke-red-body-texture
+flashbang-body-texture
+frag-grenade-body-texture
+syringe-body-texture
+molotov-and-lighter-body-texture
+c4-and-detonator-body-texture
 ```
 </details>
 
