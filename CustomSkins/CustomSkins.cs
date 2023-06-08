@@ -10,7 +10,7 @@ using HarmonyLib;
 
 namespace CustomSkins
 {
-    [BepInPlugin("CustomSkins", "Custom Skins", "0.1.0")]
+    [BepInPlugin("CustomSkins", "Custom Skins", "0.1.1")]
     public class Plugin : BaseUnityPlugin
     {
         // The folder that holds the custom textures (Onward/CustomSkins)
