@@ -119,6 +119,9 @@ namespace CustomSkins
             new SkinInfo("molotov-and-lighter-body-texture", "Pickup_Molotov", "molotov_bottle 1", ClassLoadout.EquipmentType.GrenadeMolotov),
             new SkinInfo("c4-and-detonator-body-texture", "Pickup_C4", "C4", ClassLoadout.EquipmentType.C4),
             
+            new SkinInfo("knife-marsoc-body-texture", "Pickup_KnifeMarsoc", "Knife", WeaponName.NULL),
+            new SkinInfo("knife-volk-body-texture", "Pickup_KnifeVolk", "Prefab_Knife01", WeaponName.NULL),
+
         };
 
         /// <summary>

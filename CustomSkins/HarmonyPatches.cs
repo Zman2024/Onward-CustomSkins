@@ -40,35 +40,8 @@ namespace CustomSkins
                         // Make sure there is a skin for this weapon and the texture bytes were loaded
                         if (info == null || info.TextureBytes == null || info.TextureBytes.Length == 0) continue;
 
-                        // Get all mesh renderers for the weapon model
-                        MeshRenderer[] meshRenderers = pickup.WeaponModel.GetComponentsInChildren<MeshRenderer>();
-
-                        // Search for the mesh renderer we need to override using the SkinInfo.ObjectName
-                        for (int x = 0; x < meshRenderers.Length; x++)
-                        {
-                            MeshRenderer renderer = meshRenderers[x];
-
-                            // Check the renderer's name against the SkinInfo.ObjectName
-                            // I shouldn't need the (Clone) but just in case
-                            if (renderer.name == info.ObjectName || renderer.name == (info.ObjectName + "(Clone)"))
-                            {
-                                // Cast to Texture2D so we can use LoadImage
-                                Texture2D tex = renderer.material.mainTexture as Texture2D;
-                                info.Texture = tex;
-
-                                // Replace the texture with the image loaded from CustomSkins
-                                if (tex.LoadImage(info.TextureBytes))
-                                {
-                                    Logger.LogInfo($"Replaced texture for {info.WeaponName}");
-                                }
-                                else // RIP bozo it didnt work
-                                {
-                                    Logger.LogWarning($"Could not replace texture for {info.WeaponName} (bad format?)");
-                                }
-
-                                break;
-                            }
-                        }
+                        // Replace the texture
+                        pickup.WeaponModel.ReplaceTextureInChildren(info);
                     }
                 }
 
@@ -116,12 +89,58 @@ namespace CustomSkins
 
                 }
 
+                // Edge cases for knifes and taser //
+                var knifeMS = Plugin.CurrentSkins.Find((sk) => sk.PickupName == "Pickup_KnifeMarsoc");
+                if (knifeMS != null)
+                    __instance.KnifeMarsoc.gameObject.ReplaceTextureInChildren(knifeMS);
+
+                var knifeVK = Plugin.CurrentSkins.Find((sk) => sk.PickupName == "Pickup_KnifeVolk");
+                if (knifeVK != null)
+                    __instance.KnifeMarsoc.gameObject.ReplaceTextureInChildren(knifeVK);
+
+                var taserSi = Plugin.CurrentSkins.Find((sk) => sk.WeaponName == WeaponName.Taser);
+                if (taserSi != null)
+                    __instance.GetWeaponRef(WeaponName.Taser).LoadRef().ReplaceTextureInChildren(taserSi);
+
                 // No need to run this more than once (for now)
                 Settings.HasLoadedGlobal = true;
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex);
+            }
+        }
+
+        private static void ReplaceTextureInChildren(this GameObject self, SkinInfo info)
+        {
+            // Get all mesh renderers for the model
+            MeshRenderer[] meshRenderers = self.GetComponentsInChildren<MeshRenderer>();
+
+            // Search for the mesh renderer we need to override using the SkinInfo.ObjectName
+            for (int x = 0; x < meshRenderers.Length; x++)
+            {
+                MeshRenderer renderer = meshRenderers[x];
+
+                // Check the renderer's name against the SkinInfo.ObjectName
+                // I shouldn't need the (Clone) but just in case
+                if (renderer.name == info.ObjectName || renderer.name == (info.ObjectName + "(Clone)"))
+                {
+                    // Cast to Texture2D so we can use LoadImage
+                    Texture2D tex = renderer.material.mainTexture as Texture2D;
+                    info.Texture = tex;
+
+                    // Replace the texture with the image loaded from CustomSkins
+                    if (tex.LoadImage(info.TextureBytes))
+                    {
+                        Logger.LogInfo($"Replaced texture {info.FileName}");
+                    }
+                    else // RIP bozo it didnt work
+                    {
+                        Logger.LogWarning($"Could not replace texture {info.WeaponName} (bad format?)");
+                    }
+
+                    break;
+                }
             }
         }
 
