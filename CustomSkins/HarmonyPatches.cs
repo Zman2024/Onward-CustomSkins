@@ -96,7 +96,7 @@ namespace CustomSkins
 
                 var knifeVK = Plugin.CurrentSkins.Find((sk) => sk.PickupName == "Pickup_KnifeVolk");
                 if (knifeVK != null)
-                    __instance.KnifeMarsoc.gameObject.ReplaceTextureInChildren(knifeVK);
+                    __instance.KnifeVolk.gameObject.ReplaceAllTexturesInChildren(knifeVK);
 
                 var taserSi = Plugin.CurrentSkins.Find((sk) => sk.WeaponName == WeaponName.Taser);
                 if (taserSi != null)
@@ -111,16 +111,16 @@ namespace CustomSkins
             }
         }
 
-        private static void ReplaceTextureInChildren(this GameObject self, SkinInfo info)
+        private static bool ReplaceTextureInChildren(this GameObject self, SkinInfo info)
         {
             // Get all mesh renderers for the model
             MeshRenderer[] meshRenderers = self.GetComponentsInChildren<MeshRenderer>();
-
+            List<string> names = new List<string>();
             // Search for the mesh renderer we need to override using the SkinInfo.ObjectName
             for (int x = 0; x < meshRenderers.Length; x++)
             {
                 MeshRenderer renderer = meshRenderers[x];
-
+                names.Add(renderer.name);
                 // Check the renderer's name against the SkinInfo.ObjectName
                 // I shouldn't need the (Clone) but just in case
                 if (renderer.name == info.ObjectName || renderer.name == (info.ObjectName + "(Clone)"))
@@ -139,10 +139,61 @@ namespace CustomSkins
                         Logger.LogWarning($"Could not replace texture {info.WeaponName} (bad format?)");
                     }
 
-                    break;
+                    return true;
                 }
             }
+            Logger.LogError($"FAILED TO REPLACE TEXTURE: {info.FileName} (MISSING OBJECT)");
+            string str = "found names: ";
+            foreach (var n in names)
+            {
+                str += $"{n}, ";
+            }
+            Logger.LogInfo(str);
+            return false;
         }
 
+        private static bool ReplaceAllTexturesInChildren(this GameObject self, SkinInfo info)
+        {
+            // Get all mesh renderers for the model
+            MeshRenderer[] meshRenderers = self.GetComponentsInChildren<MeshRenderer>();
+            bool retval = false;
+            List<string> names = new List<string>();
+
+            // Search for the mesh renderer we need to override using the SkinInfo.ObjectName
+            for (int x = 0; x < meshRenderers.Length; x++)
+            {
+                MeshRenderer renderer = meshRenderers[x];
+                names.Add(renderer.name);
+                // Check the renderer's name against the SkinInfo.ObjectName
+                // I shouldn't need the (Clone) but just in case
+                // Cast to Texture2D so we can use LoadImage
+                Texture2D tex = renderer.material.mainTexture as Texture2D;
+                info.Texture = tex;
+
+                // Replace the texture with the image loaded from CustomSkins
+                if (tex.LoadImage(info.TextureBytes))
+                {
+                    Logger.LogInfo($"Replaced texture {info.FileName}");
+                    retval = true;
+                }
+                else // RIP bozo it didnt work
+                {
+                    Logger.LogWarning($"Could not replace texture {info.WeaponName} (bad format?)");
+                }
+            }
+
+            if (!retval)
+            {
+                Logger.LogError($"FAILED TO REPLACE TEXTURE: {info.FileName} (MISSING OBJECT)");
+                string str = "found names: ";
+                foreach (var n in names)
+                {
+                    str += $"{n}, ";
+                }
+                Logger.LogInfo(str);
+            }
+            return retval;
+        }
+        
     }
 }

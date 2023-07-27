@@ -120,7 +120,7 @@ namespace CustomSkins
             new SkinInfo("c4-and-detonator-body-texture", "Pickup_C4", "C4", ClassLoadout.EquipmentType.C4),
             
             new SkinInfo("knife-marsoc-body-texture", "Pickup_KnifeMarsoc", "Knife", WeaponName.NULL),
-            new SkinInfo("knife-volk-body-texture", "Pickup_KnifeVolk", "Prefab_Knife01", WeaponName.NULL),
+            new SkinInfo("knife-volk-body-texture", "Pickup_KnifeVolk", "Knife", WeaponName.NULL),
 
         };
 

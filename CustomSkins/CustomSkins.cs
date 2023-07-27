@@ -15,7 +15,7 @@ namespace CustomSkins
     [BepInPlugin("CustomSkins", "Custom Skins", Version)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string Version = "0.1.2";
+        public const string Version = "0.1.3";
 
         // The folder that holds the custom textures (Onward/CustomSkins)
         public static readonly string CustomSkinsFolder = Path.Combine(Directory.GetCurrentDirectory(), "CustomSkins");
