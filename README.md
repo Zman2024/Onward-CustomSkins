@@ -59,6 +59,18 @@ AS-VAL:       T_KA_Val_Black_ALB
 RPG7:         rpg_7_dif
 SV98:         sv98_body_dif
 G3A3Auto:     g3a3_rifle_dif
+Knife (Marsoc): D_Knife01
+Knife (Volk): Albedo_Knife01
+
+M18 Smoke (White): m18_smoke_wh_dif
+M18 Smoke (Green): SmokeGrenade_Green_AlbedoTransparency_2048
+M18 Smoke (Red): SmokeGrenade_Red_AlbedoTransparency_2048
+Flashbang: m84_grenade_diff
+Frag Grenade: m67_grenade_diff
+Molotov and Lighter: molotov_dif
+
+C4 and Detonator: c4_dif 
+Syringe: Syringe_d
 ```
 </details>
 
@@ -110,6 +122,9 @@ tar21-body-texture
 rpg7-body-texture
 sv98-body-texture
 g3a3-auto-body-texture
+taser-body-texture
+knife-marsoc-body-texture
+knife-volk-body-texture
 
 m18-smoke-white-body-texture
 m18-smoke-green-body-texture
